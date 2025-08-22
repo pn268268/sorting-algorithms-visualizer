@@ -87,8 +87,8 @@ h1 {
     max-width: 800px;
 }
 
-.sorted-section,
-.unsorted-section {
+.main-section,
+.temp-section {
     flex: 1;
     text-align: center;
 }
@@ -390,6 +390,25 @@ h1 {
 .bar.pivot {
     background: linear-gradient(180deg, #fc8181 0%, #f56565 100%);
     transform: scale(1.2);
+}
+
+/* 插入排序專用顏色 */
+.bar.inserting {
+    background: linear-gradient(180deg, #f6ad55 0%, #ed8936 100%);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bar.moving {
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.bar.inserted {
+    background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 .bar.group1 {

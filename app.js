@@ -26,8 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
 function initializeAllSorts() {
     initializeSort('bubble-container');
     initializeSort('selection-container');
-    // 初始化插入排序的兩個區域
-    initializeInsertionSort('insertion-sorted', 'insertion-unsorted', numbers);
+    // 初始化插入排序 - 兩區塊
+    initializeInsertionSort('insertion-main', 'insertion-temp', numbers);
     // 初始化快速排序樹狀結構
     initializeQuickSortTree(numbers);
     // 初始化合併排序樹狀結構
@@ -68,7 +68,7 @@ function updateBar(containerId, index, height, className = '') {
         bar.dataset.value = height;
 
         // 清除所有類別
-        bar.classList.remove('comparing', 'sorted', 'pivot');
+        bar.classList.remove('comparing', 'sorted', 'pivot', 'inserting', 'moving', 'inserted');
 
         // 添加新類別
         if (className) {
@@ -136,12 +136,7 @@ function getCurrentArray(containerId) {
     return Array.from(bars).map(bar => parseInt(bar.dataset.value));
 }
 
-// 從未排序區獲取當前數組
-function getCurrentArrayFromUnsorted(containerId) {
-    const container = document.getElementById(containerId);
-    const bars = container.querySelectorAll('.bar');
-    return Array.from(bars).map(bar => parseInt(bar.dataset.value));
-}
+
 
 // 從第一層獲取當前數組
 function getCurrentArrayFromLevel1() {
@@ -270,56 +265,64 @@ async function startInsertionSort() {
     if (isRunning) return;
     isRunning = true;
 
-    const sortedContainer = 'insertion-sorted';
-    const unsortedContainer = 'insertion-unsorted';
+    const mainContainer = 'insertion-main';
+    const tempContainer = 'insertion-temp';
 
-    // 從未排序區獲取當前的數組順序
-    const currentArray = getCurrentArrayFromUnsorted(unsortedContainer);
+    // 獲取當前數組
+    let currentArray = getCurrentArrayFromMain(mainContainer);
     const n = currentArray.length;
 
-    // 初始化：所有元素放入未排序區
-    initializeInsertionSort(sortedContainer, unsortedContainer, currentArray);
+    // 初始化：所有元素放入主數組
+    initializeInsertionSort(mainContainer, tempContainer, currentArray);
 
-    // 追蹤已排序區的數組
-    let sortedArray = [];
+    // 第一個元素視為已排序
+    markAsSorted(mainContainer, 0);
 
-    for (let i = 0; i < n; i++) {
-        // 從未排序區取出第一個元素
+    for (let i = 1; i < n; i++) {
+        // 重新獲取當前數組（因為DOM可能已經改變）
+        currentArray = getCurrentArrayFromMain(mainContainer);
+        
+        // 保存當前要插入的元素
         const key = currentArray[i];
-
-        // 高亮要插入的元素
-        highlightBar(unsortedContainer, 0, 'comparing');
+        
+        // 高亮要移動的元素（橙色 - 待移動）
+        highlightBar(mainContainer, i, 'inserting');
         await sleep(delay);
 
-        // 使用插入排序的標準邏輯
-        let insertIndex = sortedArray.length;
+        // 移動元素到暫存區，在原位置留下空位
+        moveBarToTemp(mainContainer, tempContainer, i, key);
+        await sleep(delay);
 
-        // 從右到左比較，找到插入位置
-        for (let j = sortedArray.length - 1; j >= 0; j--) {
-            if (sortedArray[j] > key) {
-                // 高亮當前比較的元素
-                highlightBar(sortedContainer, j, 'comparing');
-                await sleep(delay);
-                insertIndex = j;
-            } else {
-                break;
-            }
+        let j = i - 1;
+
+        // 將大於 key 的元素向右移動
+        while (j >= 0 && currentArray[j] > key) {
+            // 高亮正在比較的元素（藍色 - 比較中）
+            highlightBar(mainContainer, j, 'comparing');
+            await sleep(delay);
+
+            // 移動元素（黃色 - 正在移動）
+            moveBarRight(mainContainer, j);
+            await sleep(delay);
+            
+            // 清除比較狀態，恢復原本顏色
+            clearHighlightAndRestoreColor(mainContainer, j, i);
+            
+            j--;
         }
 
-        // 清除所有比較狀態
-        const allSortedBars = document.querySelectorAll(`#${sortedContainer} .bar`);
-        allSortedBars.forEach(bar => {
-            bar.classList.remove('comparing');
-        });
-
-        // 插入元素到正確位置
-        sortedArray.splice(insertIndex, 0, key);
-        renderSortedArray(sortedContainer, sortedArray);
-        removeBar(unsortedContainer, 0);
-
+        // 插入 key 到正確位置（淺綠色 - 已插入）
+        insertFromTemp(mainContainer, tempContainer, j + 1, key);
+        await sleep(delay);
+        
+        // 標記為已排序
+        markAsSorted(mainContainer, j + 1);
+        
         await sleep(delay);
     }
 
+    // 標記所有元素為已排序
+    markAllAsSorted(mainContainer);
     isRunning = false;
 }
 
@@ -334,39 +337,119 @@ function updateBarInContainer(containerId, index, value) {
     }
 }
 
-// 重新渲染已排序區
-function renderSortedArray(containerId, array) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
 
-    array.forEach(value => {
-        const bar = createBar(value);
-        bar.classList.add('sorted');
-        container.appendChild(bar);
-    });
-}
 
-// 初始化插入排序的兩個區域
-function initializeInsertionSort(sortedContainer, unsortedContainer, numbers) {
-    // 清空兩個容器
-    document.getElementById(sortedContainer).innerHTML = '';
-    document.getElementById(unsortedContainer).innerHTML = '';
+// 初始化插入排序 - 兩區塊版本
+function initializeInsertionSort(mainContainer, tempContainer, numbers) {
+    // 清空所有容器
+    document.getElementById(mainContainer).innerHTML = '';
+    document.getElementById(tempContainer).innerHTML = '';
 
-    // 所有元素放入未排序區
+    // 所有元素放入主數組
     for (let i = 0; i < numbers.length; i++) {
         const bar = createBar(numbers[i]);
-        document.getElementById(unsortedContainer).appendChild(bar);
+        document.getElementById(mainContainer).appendChild(bar);
     }
 }
 
-// 創建柱子
-function createBar(value) {
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    bar.style.height = `${value * 15}px`;
-    bar.textContent = value;
-    bar.dataset.value = value;
-    return bar;
+// 從主數組獲取數組
+function getCurrentArrayFromMain(containerId) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    return Array.from(bars).map(bar => parseInt(bar.dataset.value));
+}
+
+// 移動元素到暫存區
+function moveBarToTemp(fromContainer, toContainer, index, value) {
+    // 標記要移動的元素
+    const container = document.getElementById(fromContainer);
+    const bars = container.querySelectorAll('.bar');
+    if (bars[index]) {
+        bars[index].classList.add('inserting');
+    }
+    
+    // 添加到暫存區
+    const tempBar = createBar(value);
+    tempBar.classList.add('inserting');
+    document.getElementById(toContainer).appendChild(tempBar);
+    
+    // 隱藏主數組中指定位置的元素（留下空位）
+    if (bars[index]) {
+        bars[index].style.height = '0px';
+        bars[index].textContent = '';
+        bars[index].dataset.value = '';
+        bars[index].classList.remove('inserting');
+    }
+}
+
+// 從暫存區插入元素
+function insertFromTemp(mainContainer, tempContainer, insertIndex, value) {
+    // 標記暫存區的元素為插入狀態
+    const tempBar = document.querySelector(`#${tempContainer} .bar`);
+    if (tempBar) {
+        tempBar.classList.add('inserted');
+    }
+    
+    // 插入到主數組的空位
+    const mainContainerElement = document.getElementById(mainContainer);
+    const bars = mainContainerElement.querySelectorAll('.bar');
+    
+    if (bars[insertIndex]) {
+        // 恢復空位的顯示
+        bars[insertIndex].style.height = `${value * 15}px`;
+        bars[insertIndex].textContent = value;
+        bars[insertIndex].dataset.value = value;
+        bars[insertIndex].classList.add('inserted');
+    }
+    
+    // 移除暫存區的元素
+    if (tempBar) {
+        tempBar.remove();
+    }
+}
+
+// 移除指定位置的柱子
+function removeBarAt(containerId, index) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    if (bars[index]) {
+        bars[index].remove();
+    }
+}
+
+// 向右移動柱子
+function moveBarRight(containerId, index) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    if (bars[index] && bars[index + 1]) {
+        // 獲取當前元素的值和顏色狀態
+        const currentValue = bars[index].dataset.value;
+        const currentHeight = bars[index].style.height;
+        const currentText = bars[index].textContent;
+        const isSorted = bars[index].classList.contains('sorted');
+        
+        // 移動到右邊位置
+        bars[index + 1].style.height = currentHeight;
+        bars[index + 1].textContent = currentText;
+        bars[index + 1].dataset.value = currentValue;
+        bars[index + 1].classList.add('moving');
+        
+        // 在原位置留下空位（隱藏）
+        bars[index].style.height = '0px';
+        bars[index].textContent = '';
+        bars[index].dataset.value = '';
+        
+        // 延遲後清除移動狀態，恢復原本顏色
+        setTimeout(() => {
+            if (bars[index + 1]) {
+                bars[index + 1].classList.remove('moving');
+                // 如果原本是已排序的，保持綠色
+                if (isSorted) {
+                    bars[index + 1].classList.add('sorted');
+                }
+            }
+        }, 500);
+    }
 }
 
 // 高亮柱子
@@ -376,6 +459,66 @@ function highlightBar(containerId, index, className) {
     if (bars[index]) {
         bars[index].classList.add(className);
     }
+}
+
+// 清除高亮
+function clearHighlight(containerId, index) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    if (bars[index]) {
+        bars[index].classList.remove('comparing', 'inserting', 'moving', 'inserted');
+    }
+}
+
+// 清除高亮並恢復原本顏色
+function clearHighlightAndRestoreColor(containerId, index, currentIndex) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    if (bars[index]) {
+        // 清除所有特殊狀態
+        bars[index].classList.remove('comparing', 'inserting', 'moving', 'inserted');
+        
+        // 檢查是否已經有 sorted 類別（移動過來的已排序元素）
+        const hasSortedClass = bars[index].classList.contains('sorted');
+        
+        // 如果沒有 sorted 類別，根據位置決定顏色
+        if (!hasSortedClass) {
+            if (index < currentIndex) { // 已排序區
+                bars[index].classList.add('sorted');
+            }
+            // 未排序區保持原色（不添加任何類別）
+        }
+    }
+}
+
+// 標記為已排序
+function markAsSorted(containerId, index) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    if (bars[index]) {
+        bars[index].classList.add('sorted');
+    }
+}
+
+// 標記所有為已排序
+function markAllAsSorted(containerId) {
+    const container = document.getElementById(containerId);
+    const bars = container.querySelectorAll('.bar');
+    bars.forEach(bar => {
+        bar.classList.add('sorted');
+    });
+}
+
+
+
+// 創建柱子
+function createBar(value) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = `${value * 15}px`;
+    bar.textContent = value;
+    bar.dataset.value = value;
+    return bar;
 }
 
 // 插入柱子到指定位置
@@ -392,14 +535,7 @@ function insertBar(containerId, index, value) {
     }
 }
 
-// 移除柱子
-function removeBar(containerId, index) {
-    const container = document.getElementById(containerId);
-    const bars = container.querySelectorAll('.bar');
-    if (bars[index]) {
-        container.removeChild(bars[index]);
-    }
-}
+
 
 // Quick Sort 快速排序
 async function startQuickSort() {
@@ -1195,7 +1331,7 @@ function shuffleInsertionSort() {
     if (isRunning) return;
     const shuffledNumbers = shuffleArray(numbers);
     numbers = shuffledNumbers; // 更新全域變數
-    initializeInsertionSort('insertion-sorted', 'insertion-unsorted', shuffledNumbers);
+    initializeInsertionSort('insertion-main', 'insertion-temp', shuffledNumbers);
 }
 
 function shuffleQuickSort() {
@@ -1229,7 +1365,7 @@ function setWorstCaseInsertionSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
     numbers = worstCaseNumbers; // 更新全域變數
-    initializeInsertionSort('insertion-sorted', 'insertion-unsorted', worstCaseNumbers);
+    initializeInsertionSort('insertion-main', 'insertion-temp', worstCaseNumbers);
 }
 
 function setWorstCaseQuickSort() {
@@ -1260,7 +1396,7 @@ function resetSelectionSort() {
 function resetInsertionSort() {
     if (isRunning) return;
     const numbers = [3, 7, 4, 1, 8, 2, 6, 5];
-    initializeInsertionSort('insertion-sorted', 'insertion-unsorted', numbers);
+    initializeInsertionSort('insertion-main', 'insertion-temp', numbers);
 }
 
 function resetQuickSort() {
