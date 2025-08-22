@@ -1,11 +1,11 @@
 // 全域變數
 let isRunning = false;
 const delay = 500; // 動畫延遲時間（毫秒）
-let bubbleNumbers = [3, 7, 4, 1, 8, 2, 6, 5];        // 氣泡排序：1-8範圍
-let selectionNumbers = [3, 7, 4, 1, 8, 2, 6, 5];     // 選擇排序：1-8範圍
-let insertionNumbers = [3, 7, 4, 1, 8, 2, 6, 5];     // 插入排序：1-8範圍
-let quickSortNumbers = [3, 7, 4, 1, 6, 2, 5];        // 快速排序：1-7範圍
-let mergeSortNumbers = [3, 7, 4, 1, 8, 2, 6, 5];     // 合併排序：1-8範圍
+let bubbleNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 氣泡排序：1-8範圍
+let selectionNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 選擇排序：1-8範圍
+let insertionNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 插入排序：1-8範圍
+let quickSortNumbers = [3, 7, 4, 1, 6, 2, 5]; // 快速排序：1-7範圍
+let mergeSortNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 合併排序：1-8範圍
 
 // 隨機打亂數組
 function shuffleArray(array) {
@@ -170,6 +170,48 @@ function setArray(containerId, array) {
     });
 }
 
+// 設置插入排序數組（帶動畫）
+function setInsertionArray(array) {
+    const mainContainer = document.getElementById('insertion-main');
+    const bars = mainContainer.querySelectorAll('.bar');
+
+    array.forEach((value, index) => {
+        if (bars[index]) {
+            bars[index].style.height = `${value * 15}px`;
+            bars[index].textContent = value;
+            bars[index].dataset.value = value;
+        }
+    });
+}
+
+// 設置快速排序數組（帶動畫）
+function setQuickSortArray(array) {
+    const container = document.getElementById('level-1-main');
+    const bars = container.querySelectorAll('.bar');
+
+    array.forEach((value, index) => {
+        if (bars[index]) {
+            bars[index].style.height = `${value * 15}px`;
+            bars[index].textContent = value;
+            bars[index].dataset.value = value;
+        }
+    });
+}
+
+// 設置合併排序數組（帶動畫）
+function setMergeSortArray(array) {
+    const container = document.getElementById('merge-level-1');
+    const bars = container.querySelectorAll('.bar');
+
+    array.forEach((value, index) => {
+        if (bars[index]) {
+            bars[index].style.height = `${value * 15}px`;
+            bars[index].textContent = value;
+            bars[index].dataset.value = value;
+        }
+    });
+}
+
 // Bubble Sort 氣泡排序
 async function startBubbleSort() {
     if (isRunning) return;
@@ -285,10 +327,10 @@ async function startInsertionSort() {
     for (let i = 1; i < n; i++) {
         // 重新獲取當前數組（因為DOM可能已經改變）
         currentArray = getCurrentArrayFromMain(mainContainer);
-        
+
         // 保存當前要插入的元素
         const key = currentArray[i];
-        
+
         // 高亮要移動的元素（橙色 - 待移動）
         highlightBar(mainContainer, i, 'inserting');
         await sleep(delay);
@@ -308,20 +350,20 @@ async function startInsertionSort() {
             // 移動元素（黃色 - 正在移動）
             moveBarRight(mainContainer, j);
             await sleep(delay);
-            
+
             // 清除比較狀態，恢復原本顏色
             clearHighlightAndRestoreColor(mainContainer, j, i);
-            
+
             j--;
         }
 
         // 插入 key 到正確位置（淺綠色 - 已插入）
         insertFromTemp(mainContainer, tempContainer, j + 1, key);
         await sleep(delay);
-        
+
         // 標記為已排序
         markAsSorted(mainContainer, j + 1);
-        
+
         await sleep(delay);
     }
 
@@ -371,12 +413,12 @@ function moveBarToTemp(fromContainer, toContainer, index, value) {
     if (bars[index]) {
         bars[index].classList.add('inserting');
     }
-    
+
     // 添加到暫存區
     const tempBar = createBar(value);
     tempBar.classList.add('inserting');
     document.getElementById(toContainer).appendChild(tempBar);
-    
+
     // 隱藏主數組中指定位置的元素（留下空位）
     if (bars[index]) {
         bars[index].style.height = '0px';
@@ -393,11 +435,11 @@ function insertFromTemp(mainContainer, tempContainer, insertIndex, value) {
     if (tempBar) {
         tempBar.classList.add('inserted');
     }
-    
+
     // 插入到主數組的空位
     const mainContainerElement = document.getElementById(mainContainer);
     const bars = mainContainerElement.querySelectorAll('.bar');
-    
+
     if (bars[insertIndex]) {
         // 恢復空位的顯示
         bars[insertIndex].style.height = `${value * 15}px`;
@@ -405,7 +447,7 @@ function insertFromTemp(mainContainer, tempContainer, insertIndex, value) {
         bars[insertIndex].dataset.value = value;
         bars[insertIndex].classList.add('inserted');
     }
-    
+
     // 移除暫存區的元素
     if (tempBar) {
         tempBar.remove();
@@ -431,18 +473,18 @@ function moveBarRight(containerId, index) {
         const currentHeight = bars[index].style.height;
         const currentText = bars[index].textContent;
         const isSorted = bars[index].classList.contains('sorted');
-        
+
         // 移動到右邊位置
         bars[index + 1].style.height = currentHeight;
         bars[index + 1].textContent = currentText;
         bars[index + 1].dataset.value = currentValue;
         bars[index + 1].classList.add('moving');
-        
+
         // 在原位置留下空位（隱藏）
         bars[index].style.height = '0px';
         bars[index].textContent = '';
         bars[index].dataset.value = '';
-        
+
         // 延遲後清除移動狀態，恢復原本顏色
         setTimeout(() => {
             if (bars[index + 1]) {
@@ -481,10 +523,10 @@ function clearHighlightAndRestoreColor(containerId, index, currentIndex) {
     if (bars[index]) {
         // 清除所有特殊狀態
         bars[index].classList.remove('comparing', 'inserting', 'moving', 'inserted');
-        
+
         // 檢查是否已經有 sorted 類別（移動過來的已排序元素）
         const hasSortedClass = bars[index].classList.contains('sorted');
-        
+
         // 如果沒有 sorted 類別，根據位置決定顏色
         if (!hasSortedClass) {
             if (index < currentIndex) { // 已排序區
@@ -1337,21 +1379,21 @@ function shuffleInsertionSort() {
     if (isRunning) return;
     const shuffledNumbers = shuffleArray(insertionNumbers);
     insertionNumbers = shuffledNumbers; // 更新插入排序數組
-    initializeInsertionSort('insertion-main', 'insertion-temp', shuffledNumbers);
+    setInsertionArray(shuffledNumbers);
 }
 
 function shuffleQuickSort() {
     if (isRunning) return;
     const shuffledNumbers = shuffleArray(quickSortNumbers);
     quickSortNumbers = shuffledNumbers; // 更新快速排序數組
-    initializeQuickSortTree(shuffledNumbers);
+    setQuickSortArray(shuffledNumbers);
 }
 
 function shuffleMergeSort() {
     if (isRunning) return;
     const shuffledNumbers = shuffleArray(mergeSortNumbers);
     mergeSortNumbers = shuffledNumbers; // 更新合併排序數組
-    initializeMergeSortTree(shuffledNumbers);
+    setMergeSortArray(shuffledNumbers);
 }
 
 // 最壞情況函數
@@ -1373,21 +1415,21 @@ function setWorstCaseInsertionSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
     insertionNumbers = worstCaseNumbers; // 更新插入排序數組
-    initializeInsertionSort('insertion-main', 'insertion-temp', worstCaseNumbers);
+    setInsertionArray(worstCaseNumbers);
 }
 
 function setWorstCaseQuickSort() {
     if (isRunning) return;
     const worstCaseNumbers = [7, 6, 5, 4, 3, 2, 1];
     quickSortNumbers = worstCaseNumbers; // 更新快速排序數組
-    initializeQuickSortTree(worstCaseNumbers);
+    setQuickSortArray(worstCaseNumbers);
 }
 
 function setWorstCaseMergeSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
     mergeSortNumbers = worstCaseNumbers; // 更新合併排序數組
-    initializeMergeSortTree(worstCaseNumbers);
+    setMergeSortArray(worstCaseNumbers);
 }
 
 // 重置函數（保留原有功能）
@@ -1406,17 +1448,17 @@ function resetSelectionSort() {
 function resetInsertionSort() {
     if (isRunning) return;
     insertionNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 重置插入排序數組
-    initializeInsertionSort('insertion-main', 'insertion-temp', insertionNumbers);
+    setInsertionArray(insertionNumbers);
 }
 
 function resetQuickSort() {
     if (isRunning) return;
     quickSortNumbers = [3, 7, 4, 1, 6, 2, 5]; // 重置快速排序數組
-    initializeQuickSortTree(quickSortNumbers);
+    setQuickSortArray(quickSortNumbers);
 }
 
 function resetMergeSort() {
     if (isRunning) return;
     mergeSortNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 重置合併排序數組
-    initializeMergeSortTree(mergeSortNumbers);
+    setMergeSortArray(mergeSortNumbers);
 }
