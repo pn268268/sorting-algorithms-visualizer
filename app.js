@@ -1,7 +1,11 @@
 // 全域變數
 let isRunning = false;
 const delay = 500; // 動畫延遲時間（毫秒）
-let numbers = [3, 7, 4, 1, 8, 2, 6, 5];
+let bubbleNumbers = [3, 7, 4, 1, 8, 2, 6, 5];        // 氣泡排序：1-8範圍
+let selectionNumbers = [3, 7, 4, 1, 8, 2, 6, 5];     // 選擇排序：1-8範圍
+let insertionNumbers = [3, 7, 4, 1, 8, 2, 6, 5];     // 插入排序：1-8範圍
+let quickSortNumbers = [3, 7, 4, 1, 6, 2, 5];        // 快速排序：1-7範圍
+let mergeSortNumbers = [3, 7, 4, 1, 8, 2, 6, 5];     // 合併排序：1-8範圍
 
 // 隨機打亂數組
 function shuffleArray(array) {
@@ -24,18 +28,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // 初始化所有排序演算法
 function initializeAllSorts() {
-    initializeSort('bubble-container');
-    initializeSort('selection-container');
+    initializeSort('bubble-container', bubbleNumbers);
+    initializeSort('selection-container', selectionNumbers);
     // 初始化插入排序 - 兩區塊
-    initializeInsertionSort('insertion-main', 'insertion-temp', numbers);
+    initializeInsertionSort('insertion-main', 'insertion-temp', insertionNumbers);
     // 初始化快速排序樹狀結構
-    initializeQuickSortTree(numbers);
+    initializeQuickSortTree(quickSortNumbers);
     // 初始化合併排序樹狀結構
-    initializeMergeSortTree(numbers);
+    initializeMergeSortTree(mergeSortNumbers);
 }
 
 // 初始化單個排序區域
-function initializeSort(containerId) {
+function initializeSort(containerId, numbers) {
     const container = document.getElementById(containerId);
 
     container.innerHTML = '';
@@ -571,7 +575,7 @@ function initializeQuickSortTree(numbers) {
         }
     });
 
-    // 所有元素放入第一層
+    // 使用傳入的數組放入第一層
     numbers.forEach(num => {
         const bar = createBar(num);
         document.getElementById('level-1-main').appendChild(bar);
@@ -627,7 +631,7 @@ async function partitionLevel1(array) {
 
     // 找到數字5的索引
     // const pivotIndex = array.length - 1; // 找最後一個
-    const pivotIndex = array.findIndex(num => num === 5);
+    const pivotIndex = array.findIndex(num => num === 4);
     const pivot = array[pivotIndex];
 
     // 高亮樞軸
@@ -818,7 +822,7 @@ async function mergeBackToLevel1() {
     }
 
     // 簡化：直接按數字大小排序
-    const allNumbers = numbers.sort((a, b) => a - b);
+    const allNumbers = quickSortNumbers.sort((a, b) => a - b);
 
     // 清空第一層
     document.getElementById('level-1-main').innerHTML = '';
@@ -1317,34 +1321,36 @@ async function startMergeSort() {
 // 隨機打亂函數
 function shuffleBubbleSort() {
     if (isRunning) return;
-    const shuffledNumbers = shuffleArray(numbers);
+    const shuffledNumbers = shuffleArray(bubbleNumbers);
+    bubbleNumbers = shuffledNumbers; // 更新氣泡排序數組
     setArray('bubble-container', shuffledNumbers);
 }
 
 function shuffleSelectionSort() {
     if (isRunning) return;
-    const shuffledNumbers = shuffleArray(numbers);
+    const shuffledNumbers = shuffleArray(selectionNumbers);
+    selectionNumbers = shuffledNumbers; // 更新選擇排序數組
     setArray('selection-container', shuffledNumbers);
 }
 
 function shuffleInsertionSort() {
     if (isRunning) return;
-    const shuffledNumbers = shuffleArray(numbers);
-    numbers = shuffledNumbers; // 更新全域變數
+    const shuffledNumbers = shuffleArray(insertionNumbers);
+    insertionNumbers = shuffledNumbers; // 更新插入排序數組
     initializeInsertionSort('insertion-main', 'insertion-temp', shuffledNumbers);
 }
 
 function shuffleQuickSort() {
     if (isRunning) return;
-    const shuffledNumbers = shuffleArray(numbers);
-    numbers = shuffledNumbers; // 更新全域變數
+    const shuffledNumbers = shuffleArray(quickSortNumbers);
+    quickSortNumbers = shuffledNumbers; // 更新快速排序數組
     initializeQuickSortTree(shuffledNumbers);
 }
 
 function shuffleMergeSort() {
     if (isRunning) return;
-    const shuffledNumbers = shuffleArray(numbers);
-    numbers = shuffledNumbers; // 更新全域變數
+    const shuffledNumbers = shuffleArray(mergeSortNumbers);
+    mergeSortNumbers = shuffledNumbers; // 更新合併排序數組
     initializeMergeSortTree(shuffledNumbers);
 }
 
@@ -1352,61 +1358,65 @@ function shuffleMergeSort() {
 function setWorstCaseBubbleSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
+    bubbleNumbers = worstCaseNumbers; // 更新氣泡排序數組
     setArray('bubble-container', worstCaseNumbers);
 }
 
 function setWorstCaseSelectionSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
+    selectionNumbers = worstCaseNumbers; // 更新選擇排序數組
     setArray('selection-container', worstCaseNumbers);
 }
 
 function setWorstCaseInsertionSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
-    numbers = worstCaseNumbers; // 更新全域變數
+    insertionNumbers = worstCaseNumbers; // 更新插入排序數組
     initializeInsertionSort('insertion-main', 'insertion-temp', worstCaseNumbers);
 }
 
 function setWorstCaseQuickSort() {
     if (isRunning) return;
-    const worstCaseNumbers = generateWorstCaseArray();
-    numbers = worstCaseNumbers; // 更新全域變數
+    const worstCaseNumbers = [7, 6, 5, 4, 3, 2, 1];
+    quickSortNumbers = worstCaseNumbers; // 更新快速排序數組
     initializeQuickSortTree(worstCaseNumbers);
 }
 
 function setWorstCaseMergeSort() {
     if (isRunning) return;
     const worstCaseNumbers = generateWorstCaseArray();
-    numbers = worstCaseNumbers; // 更新全域變數
+    mergeSortNumbers = worstCaseNumbers; // 更新合併排序數組
     initializeMergeSortTree(worstCaseNumbers);
 }
 
 // 重置函數（保留原有功能）
 function resetBubbleSort() {
     if (isRunning) return;
-    initializeSort('bubble-container');
+    bubbleNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 重置氣泡排序數組
+    initializeSort('bubble-container', bubbleNumbers);
 }
 
 function resetSelectionSort() {
     if (isRunning) return;
-    initializeSort('selection-container');
+    selectionNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 重置選擇排序數組
+    initializeSort('selection-container', selectionNumbers);
 }
 
 function resetInsertionSort() {
     if (isRunning) return;
-    const numbers = [3, 7, 4, 1, 8, 2, 6, 5];
-    initializeInsertionSort('insertion-main', 'insertion-temp', numbers);
+    insertionNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 重置插入排序數組
+    initializeInsertionSort('insertion-main', 'insertion-temp', insertionNumbers);
 }
 
 function resetQuickSort() {
     if (isRunning) return;
-    const numbers = [3, 7, 4, 1, 8, 2, 6, 5];
-    initializeQuickSortTree(numbers);
+    quickSortNumbers = [3, 7, 4, 1, 6, 2, 5]; // 重置快速排序數組
+    initializeQuickSortTree(quickSortNumbers);
 }
 
 function resetMergeSort() {
     if (isRunning) return;
-    const numbers = [3, 7, 4, 1, 8, 2, 6, 5];
-    initializeMergeSortTree(numbers);
+    mergeSortNumbers = [3, 7, 4, 1, 8, 2, 6, 5]; // 重置合併排序數組
+    initializeMergeSortTree(mergeSortNumbers);
 }
