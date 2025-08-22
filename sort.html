@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="透過互動式視覺化展示來學習和理解各種排序演算法,包含氣泡排序、選擇排序、插入排序等經典排序方法">
+    <meta name="keywords" content="排序演算法,氣泡排序,選擇排序,插入排序,演算法視覺化,程式學習">
+    <meta name="author" content="排序演算法視覺化團隊">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="排序演算法視覺化">
+    <meta property="og:description" content="透過互動式視覺化展示來學習和理解各種排序演算法">
+    <meta property="og:type" content="website">
+    <title>排序演算法視覺化</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>排序演算法視覺化</h1>
+
+        <!-- Bubble Sort 氣泡排序 -->
+        <div class="algorithm-section">
+            <h2>Bubble Sort 氣泡排序</h2>
+            <div class="visualization-container">
+                <div class="controls">
+                    <button class="play-btn" onclick="startBubbleSort()">播放</button>
+                    <button class="reset-btn" onclick="shuffleBubbleSort()">隨機打亂</button>
+                    <button class="worst-case-btn" onclick="setWorstCaseBubbleSort()">最壞情況</button>
+                </div>
+
+                <div class="bars-container" id="bubble-container"></div>
+            </div>
+        </div>
+
+        <!-- Selection Sort 選擇排序 -->
+        <div class="algorithm-section">
+            <h2>Selection Sort 選擇排序</h2>
+            <div class="visualization-container">
+                <div class="controls">
+                    <button class="play-btn" onclick="startSelectionSort()">播放</button>
+                    <button class="reset-btn" onclick="shuffleSelectionSort()">隨機打亂</button>
+                    <button class="worst-case-btn" onclick="setWorstCaseSelectionSort()">最壞情況</button>
+                </div>
+
+                <div class="bars-container" id="selection-container"></div>
+            </div>
+        </div>
+
+        <!-- Insertion Sort 插入排序 -->
+        <div class="algorithm-section">
+            <h2>Insertion Sort 插入排序</h2>
+            <div class="visualization-container">
+                <div class="controls">
+                    <button class="play-btn" onclick="startInsertionSort()">播放</button>
+                    <button class="reset-btn" onclick="shuffleInsertionSort()">隨機打亂</button>
+                    <button class="worst-case-btn" onclick="setWorstCaseInsertionSort()">最壞情況</button>
+                </div>
+
+                <div class="insertion-sort-container">
+                    <div class="sorted-section">
+                        <h3>已排序區</h3>
+                        <div class="bars-container" id="insertion-sorted"></div>
+                    </div>
+                    <div class="unsorted-section">
+                        <h3>未排序區</h3>
+                        <div class="bars-container" id="insertion-unsorted"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Sort 快速排序 -->
+        <div class="algorithm-section">
+            <h2>Quick Sort 快速排序</h2>
+            <div class="visualization-container">
+                <div class="controls">
+                    <button class="play-btn" onclick="startQuickSort()">播放</button>
+                    <button class="reset-btn" onclick="shuffleQuickSort()">隨機打亂</button>
+                    <button class="worst-case-btn" onclick="setWorstCaseQuickSort()">最壞情況</button>
+                </div>
+
+                <div class="quick-sort-tree">
+                    <!-- 第一層 -->
+                    <div class="level-1">
+                        <div class="bars-container" id="level-1-main"></div>
+                    </div>
+
+                    <!-- 第二層 -->
+                    <div class="level-2">
+                        <div class="bars-container" id="level-2-left"></div>
+                        <div class="bars-container" id="level-2-pivot"></div>
+                        <div class="bars-container" id="level-2-right"></div>
+                    </div>
+
+                    <!-- 第三層 -->
+                    <div class="level-3">
+                        <div class="level-3-left-group">
+                            <div class="bars-container" id="level-3-ll"></div>
+                            <div class="bars-container" id="level-3-lp"></div>
+                            <div class="bars-container" id="level-3-lr"></div>
+                        </div>
+                        <div class="level-3-right-group">
+                            <div class="bars-container" id="level-3-rl"></div>
+                            <div class="bars-container" id="level-3-rp"></div>
+                            <div class="bars-container" id="level-3-rr"></div>
+                        </div>
+                    </div>
+
+                    <!-- 第四層 -->
+                    <div class="level-4">
+                        <div class="level-4-left-group">
+                            <div class="level-4-ll-group">
+                                <div class="bars-container" id="level-4-lll"></div>
+                                <div class="bars-container" id="level-4-llp"></div>
+                                <div class="bars-container" id="level-4-llr"></div>
+                            </div>
+                            <div class="level-4-lr-group">
+                                <div class="bars-container" id="level-4-lrl"></div>
+                                <div class="bars-container" id="level-4-lrp"></div>
+                                <div class="bars-container" id="level-4-lrr"></div>
+                            </div>
+                        </div>
+                        <div class="level-4-right-group">
+                            <div class="level-4-rl-group">
+                                <div class="bars-container" id="level-4-rll"></div>
+                                <div class="bars-container" id="level-4-rlp"></div>
+                                <div class="bars-container" id="level-4-rlr"></div>
+                            </div>
+                            <div class="level-4-rr-group">
+                                <div class="bars-container" id="level-4-rrl"></div>
+                                <div class="bars-container" id="level-4-rrp"></div>
+                                <div class="bars-container" id="level-4-rrr"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Merge Sort 合併排序 -->
+        <div class="algorithm-section">
+            <h2>Merge Sort 合併排序</h2>
+
+            <div class="visualization-container">
+                <div class="controls">
+                    <button class="play-btn" onclick="startMergeSort()">播放</button>
+                    <button class="reset-btn" onclick="shuffleMergeSort()">隨機打亂</button>
+                    <button class="worst-case-btn" onclick="setWorstCaseMergeSort()">最壞情況</button>
+                </div>
+
+                <div class="merge-sort-tree">
+                    <!-- 第一層：原始數組 -->
+                    <div class="level-1">
+                        <div class="bars-container" id="merge-level-1"></div>
+                    </div>
+
+                    <!-- 第二層：第一次分割 -->
+                    <div class="level-2">
+                        <div class="bars-container" id="merge-level-2-left"></div>
+                        <div class="bars-container" id="merge-level-2-right"></div>
+                    </div>
+
+                    <!-- 第三層：第二次分割 -->
+                    <div class="level-3">
+                        <div class="level-3-left-group">
+                            <div class="bars-container" id="merge-level-3-ll"></div>
+                            <div class="bars-container" id="merge-level-3-lr"></div>
+                        </div>
+                        <div class="level-3-right-group">
+                            <div class="bars-container" id="merge-level-3-rl"></div>
+                            <div class="bars-container" id="merge-level-3-rr"></div>
+                        </div>
+                    </div>
+
+                    <!-- 第四層：第三次分割 -->
+                    <div class="level-4">
+                        <div class="level-4-left-group">
+                            <div class="level-4-ll-group">
+                                <div class="bars-container" id="merge-level-4-lll"></div>
+                                <div class="bars-container" id="merge-level-4-llr"></div>
+                            </div>
+                            <div class="level-4-lr-group">
+                                <div class="bars-container" id="merge-level-4-lrl"></div>
+                                <div class="bars-container" id="merge-level-4-lrr"></div>
+                            </div>
+                        </div>
+                        <div class="level-4-right-group">
+                            <div class="level-4-rl-group">
+                                <div class="bars-container" id="merge-level-4-rll"></div>
+                                <div class="bars-container" id="merge-level-4-rlr"></div>
+                            </div>
+                            <div class="level-4-rr-group">
+                                <div class="bars-container" id="merge-level-4-rrl"></div>
+                                <div class="bars-container" id="merge-level-4-rrr"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 合併層：從下往上合併 -->
+                    <div class="merge-levels">
+                        <div class="merge-level-3-result">
+                            <div class="bars-container" id="merge-result-3-ll"></div>
+                            <div class="bars-container" id="merge-result-3-lr"></div>
+                            <div class="bars-container" id="merge-result-3-rl"></div>
+                            <div class="bars-container" id="merge-result-3-rr"></div>
+                        </div>
+                        <div class="merge-level-2-result">
+                            <div class="bars-container" id="merge-result-2-left"></div>
+                            <div class="bars-container" id="merge-result-2-right"></div>
+                        </div>
+                        <div class="merge-level-1-result">
+                            <div class="bars-container" id="merge-result-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
